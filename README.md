@@ -1,11 +1,5 @@
-<<<<<<< HEAD
 # da-payment-planner
-A CLI tool that will eventually help organise a Digital Agency efficiently manage and track client payments
-=======
-<<<<<<< HEAD
-# da-payment-planner
-A CLI tool that will eventually help organise a Digital Agency efficiently manage and track client payments
-=======
+
 <a href="https://supportukrainenow.org/"><img src="https://raw.githubusercontent.com/vshymanskyy/StandWithUkraine/main/banner-direct.svg" width="100%"></a>
 
 ------
@@ -46,5 +40,3 @@ For full documentation, visit [laravel-zero.com](https://laravel-zero.com/).
 ## License
 
 Laravel Zero is an open-source software licensed under the MIT license.
->>>>>>> 8c574e1 ([init] Project initialization)
->>>>>>> 5850523 (Initial commit)
