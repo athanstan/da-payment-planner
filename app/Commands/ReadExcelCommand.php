@@ -42,8 +42,14 @@ class ReadExcelCommand extends Command
                 });
 
             }elseif ($filter == 'email') {
+
                 $rows = $rows->filter(function (array $row) {
                     return $row['Owner Email'] !== '-' && $row['Owner Email'] !== '';
+                });
+            }elseif ($filter == 'bandWidth') {
+
+                $rows = $rows->filter(function (array $row) {
+                    return $row['Bandwidth'] !== '-' && $row['Owner Email'] !== '';
                 });
 
             }else{
