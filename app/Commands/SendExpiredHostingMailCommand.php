@@ -45,19 +45,19 @@ class SendExpiredHostingMailCommand extends Command
      */
     public function handle(GoogleSheetService $spreadsheetService)
     {
-
         #get data from google sheet
         $response = $spreadsheetService->getSpreadsheetData();
 
         #iterate through data and send email to each client
         foreach ($response as $key => $hostingRow) {
             if ($hostingRow->Period == 1) {
+                if ($key == 5) break;
 
-                // $this->mailer->raw('This is a test email from Laravel Zero.', function ($message) use ($email) {
-                //     $message->subject('Test Email')
-                //         ->to($email)
-                //         ->from('you@domain.com');
-                // });
+                $this->mailer->send('email', ['hostingRow' => $hostingRow], function ($message) use ($hostingRow) {
+                    $message->subject('Your hosting is about to expire!')
+                            ->to($hostingRow->{"Owner Email"})
+                            ->from('support@dtek.gr', 'DTek Networking');
+                });
 
                 $this->info("Email has been sent to {$hostingRow->{"Owner Email"}}");
             }

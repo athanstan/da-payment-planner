@@ -72,4 +72,9 @@ return [
         Illuminate\View\ViewServiceProvider::class,
     ],
 
+    'aliases' => [
+        'Mail' => Illuminate\Support\Facades\Mail::class,
+        'View' => Illuminate\Support\Facades\View::class,
+    ],
+
 ];
