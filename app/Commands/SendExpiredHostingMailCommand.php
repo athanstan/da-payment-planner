@@ -71,11 +71,11 @@ class SendExpiredHostingMailCommand extends Command
 
                 if ($key == 5) break; // comment this line to send email to all clients
 
-                // $this->mailer->send('email', ['hostingRow' => $hostingRow], function ($message) use ($hostingRow) {
-                //     $message->subject('Your hosting is about to expire!')
-                //     ->to($hostingRow->{"Owner Email"})
-                //     ->from('support@dtek.gr', 'DTek Networking');
-                // });
+                $this->mailer->send('email', ['hostingRow' => $hostingRow], function ($message) use ($hostingRow) {
+                    $message->subject('Your hosting is about to expire!')
+                    ->to($hostingRow->{"Owner Email"})
+                    ->from('support@dtek.gr', 'DTek Networking');
+                });
 
                 $emailsSent[] = $ownerEmail; // add email to the sent list
                 $this->info("Email has been sent to {$ownerEmail}");
