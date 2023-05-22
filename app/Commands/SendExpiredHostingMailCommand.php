@@ -10,28 +10,16 @@ use LaravelZero\Framework\Commands\Command;
 
 class SendExpiredHostingMailCommand extends Command
 {
-    /**
-     * The signature of the command.
-     *
-     * @var string
-     */
+
     protected $signature = 'app:send-expired-hosting-mail';
+    protected $description = 'Reads data from the Google Sheet and sends an email to the client if their hosting is expired.';
 
-    /**
-     * The description of the command.
-     *
-     * @var string
-     */
-    protected $description = 'Reads data from the google sheet and sends an email to the client if their hosting is expired.';
+    protected $mailer; // mailer object
+    protected $daysBeforeExpiration = 15; // send email if hosting expires in 15 days
 
-    protected $mailer;
+    protected $emailsSent = []; // list of emails sent
+    protected $emailsNotSent = []; // list of emails not sent
 
-    /**
-     * Create a new command instance.
-     *
-     * @param Mailer $mailer
-     * @return void
-     */
     public function __construct(Mailer $mailer)
     {
         parent::__construct();
@@ -39,20 +27,10 @@ class SendExpiredHostingMailCommand extends Command
         $this->mailer = $mailer;
     }
 
-    /**
-     * Execute the console command.
-     *
-     * @return mixed
-     */
     public function handle(GoogleSheetService $spreadsheetService)
     {
         #get data from google sheet
         $response = $spreadsheetService->getSpreadsheetData();
-        $daysBeforeExpiration = 15;
-
-        # initialize the arrays
-        $emailsSent = [];
-        $emailsNotSent = [];
 
         #iterate through data and send email to each client
         foreach ($response as $key => $hostingRow) {
@@ -61,23 +39,17 @@ class SendExpiredHostingMailCommand extends Command
             $now = Carbon::now();
             $cost = $hostingRow->{"Cost"};
             $ownerEmail = $hostingRow->{"Owner Email"};
-            $period = $hostingRow->{"Period"};
 
-            if ($expirationDate->diffInDays($now) <= $daysBeforeExpiration && is_numeric($cost)) {
+            if ($expirationDate->diffInDays($now) <= $this->daysBeforeExpiration && is_numeric($cost)) {
 
                 if ($cost == 0) {
-                    $emailsNotSent[$ownerEmail] = 'Free hosting'; // add email to the not sent list with reason
+                    $this->emailsNotSent[$ownerEmail] = 'Free hosting'; // add email to the not sent list with reason
                     continue; // skip free hosting
                 }
 
-                // if ($key == 5) break; // comment this line to send email to all clients
+                if ($key == 5) break; // comment this line to send email to all clients
 
-                $this->mailer->send('email', ['hostingRow' => $hostingRow], function ($message) use ($hostingRow) {
-                    $message->subject('Your hosting is about to expire!')
-                    ->to($hostingRow->{"Owner Email"})
-                    ->from('support@dtek.gr', 'DTek Networking');
-                });
-
+                $this->sendHostingExpirationEmail($hostingRow);
                 $emailsSent[] = $ownerEmail; // add email to the sent list
                 $this->info("Email has been sent to {$ownerEmail}");
             } else {
@@ -86,12 +58,37 @@ class SendExpiredHostingMailCommand extends Command
         }
 
         # send report email
-        $this->mailer->send('emails.report', ['emailsSent' => $emailsSent, 'emailsNotSent' => $emailsNotSent], function ($message) {
-            $message->subject('Email Sending Report')
-                    ->to('support@dtek.gr')
-                    ->from('support@dtek.gr', 'DTek Networking');
-        });
+        $this->sendReportEmail();
 
+    }
+
+    /**
+     * Sends an email to the client based on hosting data.
+     *
+     * @param object $hostingRow
+     * @return void
+     */
+    protected function sendHostingExpirationEmail($hostingRow): void
+    {
+        $this->mailer->send('email', ['hostingRow' => $hostingRow], function ($message) use ($hostingRow) {
+            $message->subject('Your hosting is about to expire!')
+                ->to($hostingRow->{"Owner Email"})
+                ->from('support@dtek.gr', 'DTek Networking');
+        });
+    }
+
+    /**
+     * Sends the report email containing sent and unsent emails.
+     *
+     * @return void
+     */
+    protected function sendReportEmail(): void
+    {
+        $this->mailer->send('emails.report', ['emailsSent' => $this->emailsSent, 'emailsNotSent' => $this->emailsNotSent], function ($message) {
+            $message->subject('Email Sending Report')
+                ->to('support@dtek.gr')
+                ->from('support@dtek.gr', 'DTek Networking');
+        });
     }
 
     /**
@@ -104,4 +101,5 @@ class SendExpiredHostingMailCommand extends Command
     {
         // $schedule->command(static::class)->everyMinute();
     }
+
 }
