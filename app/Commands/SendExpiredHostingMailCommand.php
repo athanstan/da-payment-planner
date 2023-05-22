@@ -61,6 +61,7 @@ class SendExpiredHostingMailCommand extends Command
             $now = Carbon::now();
             $cost = $hostingRow->{"Cost"};
             $ownerEmail = $hostingRow->{"Owner Email"};
+            $period = $hostingRow->{"Period"};
 
             if ($expirationDate->diffInDays($now) <= $daysBeforeExpiration && is_numeric($cost)) {
 
@@ -69,7 +70,7 @@ class SendExpiredHostingMailCommand extends Command
                     continue; // skip free hosting
                 }
 
-                if ($key == 5) break; // comment this line to send email to all clients
+                // if ($key == 5) break; // comment this line to send email to all clients
 
                 $this->mailer->send('email', ['hostingRow' => $hostingRow], function ($message) use ($hostingRow) {
                     $message->subject('Your hosting is about to expire!')

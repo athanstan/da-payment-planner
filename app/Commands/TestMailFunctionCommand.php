@@ -43,7 +43,7 @@ class TestMailFunctionCommand extends Command
     public function handle()
     {
         try {
-            $this->mailer->raw('Mailing functions are working correctly!', function ($message) {
+            $this->mailer->raw('Mailing functions are working correctly! Good Morning Dtek Workers and have a great week day! Remember, be like water my friends!', function ($message) {
                 $message->subject('Test Email')
                         ->to('support@dtek.gr') // replace with your email
                         ->from('support@dtek.gr', 'DTek Networking');
